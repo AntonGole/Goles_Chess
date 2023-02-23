@@ -2,7 +2,7 @@ import pygame
 import sys
 
 from const import *
-from chessGame import ChessGame
+from chessGame import ChessGame, calculate_moves
 
 
 class Main:
@@ -22,6 +22,7 @@ class Main:
 
         while True:
             game.show_bg(screen)
+            game.show_moves(screen)
             game.show_pieces(screen)
 
             if dragger.dragging:
@@ -35,19 +36,33 @@ class Main:
 
                     clicked_row = dragger.mouseY // SQSIZE
                     clicked_col = dragger.mouseX // SQSIZE
+
                     piece = board[clicked_row][clicked_col]
-                    if piece != 0:
+
+                    if piece != 0 and ((piece > 0 and game.turn == 0) or (piece < 0 and game.turn == 1)):
+
                         dragger.save_initial(event.pos)
                         dragger.drag_piece(piece)
+
+                        game.show_bg(screen)
+                        game.show_moves(screen)
+                        game.show_pieces(screen)
 
                 # mouse motion event
                 elif event.type == pygame.MOUSEMOTION:
                     if dragger.dragging:
                         dragger.update_mouse(event.pos)
+                        game.show_bg(screen)
+                        game.show_moves(screen)
+                        game.show_pieces(screen)
                         dragger.update_blit(screen, game.images)
 
                 # click release event
                 elif event.type == pygame.MOUSEBUTTONUP:
+                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(board, dragger.piece, dragger.initial_row, dragger.initial_col):
+                        game.make_move(board, (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE), dragger.piece)
+                        game.lastMove = (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE)
+                        game.swap_turn()
                     dragger.undrag_piece()
 
                 # quit application event
@@ -58,5 +73,7 @@ class Main:
             pygame.display.update()
 
 
-main = Main()
-main.mainloop()
+if __name__ == "__main__":
+    main = Main()
+    main.mainloop()
+
