@@ -24,6 +24,17 @@ def newChessBoard():
             [4, 2, 3, 5, 6, 3, 2, 4]]
 
 
+def testChessBoard():
+    return [[-4, 0, 0, 0, -6, 0, 0, -4],
+            [-1, -1, -1, -1, -1, -1, -1, -1],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1],
+            [4, 0, 0, 0, 6, 0, 0, 4]]
+
+
 def in_range(move):
     return max(move[0], move[1]) < 8 and min(move[0], move[1]) > -1
 
@@ -263,10 +274,12 @@ def calculate_straight_moves(board, piece, row, col):
     return valid_moves
 
 
-def calculate_moves(board, piece, row, col):
+def calculate_moves(game, piece, row, col):
     """
         Calculate all possible (valid) moves of a piece from a specific position
     """
+
+    board = game.board
 
     valid_moves = []
 
@@ -322,6 +335,30 @@ def calculate_moves(board, piece, row, col):
             (row, col - 1),
             (row - 1, col - 1),
         ]
+
+        # Castling
+        if not game.whiteCastled:
+            if not game.whiteRook1_moved:
+                c = col
+                while True:
+                    c -= 1
+
+                    if not board[row][c] == 0:
+                        break
+
+                    if c == 1:
+                        valid_moves.append((row, col, row, col-2))
+
+            if not game.whiteRook2_moved:
+                c = col
+                while True:
+                    c += 1
+
+                    if not board[row][c] == 0:
+                        break
+
+                    if c == 6:
+                        valid_moves.append((row, col, row, col + 2))
 
         for possible_move in possible_moves:
             if in_range(possible_move):
@@ -382,6 +419,30 @@ def calculate_moves(board, piece, row, col):
             (row - 1, col - 1),
         ]
 
+        # Castling
+        if not game.blackCastled:
+            if not game.blackRook1_moved:
+                c = col
+                while True:
+                    c -= 1
+
+                    if not board[row][c] == 0:
+                        break
+
+                    if c == 1:
+                        valid_moves.append((row, col, row, col - 2))
+
+            if not game.blackRook2_moved:
+                c = col
+                while True:
+                    c += 1
+
+                    if not board[row][c] == 0:
+                        break
+
+                    if c == 6:
+                        valid_moves.append((row, col, row, col + 2))
+
         for possible_move in possible_moves:
             if in_range(possible_move):
                 if board[possible_move[0]][possible_move[1]] > -1:
@@ -417,7 +478,7 @@ def loadImages():
 class ChessGame:
 
     def __init__(self):
-        self.board = newChessBoard()
+        self.board = testChessBoard()
         self.images = loadImages()
         self.dragger = Dragger()
 
@@ -427,6 +488,11 @@ class ChessGame:
         self.whiteCastled = False
         self.blackCastled = False
         self.lastMove = None
+
+        self.whiteRook1_moved = False
+        self.whiteRook2_moved = False
+        self.blackRook1_moved = False
+        self.blackRook2_moved = False
 
     def swap_turn(self):
         self.turn = 1 if self.turn == 0 else 0
@@ -462,7 +528,7 @@ class ChessGame:
         if self.dragger.dragging:
             piece = self.dragger.piece
 
-            moves = calculate_moves(self.board, piece, self.dragger.initial_row, self.dragger.initial_col)
+            moves = calculate_moves(self, piece, self.dragger.initial_row, self.dragger.initial_col)
 
             for move in moves:
                 # color
@@ -483,8 +549,48 @@ class ChessGame:
             if move[2] == 0:
                 board[move[2]][move[3]] = 5
 
-        if piece == -1:
+        elif piece == -1:
             if move[2] == 7:
                 board[move[2]][move[3]] = -5
+
+        # Castling
+        print(abs(move[1] - move[3]))
+        if abs(piece) == 6 and abs(move[1] - move[3]) == 2:
+            # King side castling
+            if move[3] == 2:
+                board[move[0]][3] = board[move[0]][0]
+                board[move[0]][0] = 0
+                if piece == 6:
+                    self.whiteCastled = True
+                else:
+                    self.blackCastled = True
+
+            # Queen side castling
+            if move[3] == 6:
+                board[move[0]][5] = board[move[0]][7]
+                board[move[0]][7] = 0
+                if piece == 6:
+                    self.whiteCastled = True
+                else:
+                    self.blackCastled = True
+
+        # Castling privileges
+        elif piece == 6:
+            self.whiteCastled = True
+
+        elif piece == -6:
+            self.blackCastled = True
+
+        elif piece == 4 and not self.whiteCastled:
+            if (move[0], move[1]) == (7, 0):
+                self.whiteRook1_moved = True
+            elif (move[0], move[1]) == (7, 7):
+                self.whiteRook2_moved = True
+
+        elif piece == -4 and not self.blackCastled:
+            if (move[0], move[1]) == (0, 0):
+                self.blackRook1_moved = True
+            elif (move[0], move[1]) == (0, 7):
+                self.blackRook2_moved = True
 
         return board

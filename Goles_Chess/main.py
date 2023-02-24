@@ -59,7 +59,7 @@ class Main:
 
                 # click release event
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(board, dragger.piece, dragger.initial_row, dragger.initial_col):
+                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(game, dragger.piece, dragger.initial_row, dragger.initial_col):
                         game.make_move(board, (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE), dragger.piece)
                         game.lastMove = (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE)
                         game.swap_turn()
