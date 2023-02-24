@@ -478,7 +478,7 @@ def loadImages():
 class ChessGame:
 
     def __init__(self):
-        self.board = testChessBoard()
+        self.board = newChessBoard()
         self.images = loadImages()
         self.dragger = Dragger()
 
@@ -532,13 +532,15 @@ class ChessGame:
 
             for move in moves:
                 # color
-                color = '#C86464' if (move[2] + move[3]) % 2 == 0 else '#C84646'
+                color = '#D2D58A' if (move[2] + move[3]) % 2 == 0 else '#69874E'
 
-                # rect
-                rect = (move[3] * SQSIZE, move[2] * SQSIZE, SQSIZE, SQSIZE)
-
-                # blit
-                pygame.draw.rect(surface, color, rect)
+                # position of circle
+                if self.board[move[2]][move[3]] == 0:
+                    circle_pos = (move[3] * SQSIZE + SQSIZE // 2, move[2] * SQSIZE + SQSIZE // 2)
+                    pygame.draw.circle(surface, color, circle_pos, 10)
+                else:
+                    circle_pos = (move[3] * SQSIZE + SQSIZE // 2, move[2] * SQSIZE + SQSIZE // 2)
+                    pygame.draw.circle(surface, color, circle_pos, SQSIZE//2, width=4)
 
     def make_move(self, board, move, piece):
         board[move[0]][move[1]] = 0
