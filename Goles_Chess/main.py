@@ -31,7 +31,7 @@ class Main:
             for event in pygame.event.get():
 
                 # click event
-                if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT:
                     dragger.update_mouse(event.pos)
 
                     clicked_row = dragger.mouseY // SQSIZE
@@ -58,7 +58,7 @@ class Main:
                         dragger.update_blit(screen, game.images)
 
                 # click release event
-                elif event.type == pygame.MOUSEBUTTONUP:
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == LEFT:
                     if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(game, dragger.piece, dragger.initial_row, dragger.initial_col):
                         game.make_move(board, (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE), dragger.piece)
                         game.lastMove = (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE)

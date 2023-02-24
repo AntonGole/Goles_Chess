@@ -300,6 +300,12 @@ def calculate_moves(game, piece, row, col):
             if board[row - 1][col + 1] < 0:
                 valid_moves.append((row, col, row - 1, col + 1))
 
+        # En passant
+        # If the en passant col is 1 step away from pawns col and the en passant row is 1 step above the pawns row
+        if game.en_passant is not None:
+            if abs(col - game.en_passant[1]) == 1 and row - game.en_passant[0] == 1:
+                valid_moves.append((row, col, game.en_passant[0], game.en_passant[1]))
+
         for possible_move in possible_moves:
             if board[possible_move[0]][possible_move[1]] == 0:
                 # Add the possible move as a 4-tuple to the list of valid moves
@@ -382,6 +388,12 @@ def calculate_moves(game, piece, row, col):
         if in_range((row + 1, col + 1)):
             if board[row + 1][col + 1] > 0:
                 valid_moves.append((row, col, row + 1, col + 1))
+
+        # En passant
+        # If the en passant col is 1 step away from pawns col and the en passant row is 1 step below the pawns row
+        if game.en_passant is not None:
+            if abs(col - game.en_passant[1]) == 1 and row - game.en_passant[0] == -1:
+                valid_moves.append((row, col, game.en_passant[0], game.en_passant[1]))
 
         for possible_move in possible_moves:
             if board[possible_move[0]][possible_move[1]] == 0:
@@ -494,6 +506,8 @@ class ChessGame:
         self.blackRook1_moved = False
         self.blackRook2_moved = False
 
+        self.en_passant = None
+
     def swap_turn(self):
         self.turn = 1 if self.turn == 0 else 0
 
@@ -503,9 +517,9 @@ class ChessGame:
         for row in range(ROWS):
             for col in range(COLS):
                 if (row + col) % 2 == 0:
-                    color = (234, 235, 200)
+                    color = (238, 238, 210)
                 else:
-                    color = (119, 154, 88)
+                    color = (118, 150, 86)
 
                 rect = (col * SQSIZE, row * SQSIZE, SQSIZE, SQSIZE)
 
@@ -532,7 +546,7 @@ class ChessGame:
 
             for move in moves:
                 # color
-                color = '#D2D58A' if (move[2] + move[3]) % 2 == 0 else '#69874E'
+                color = '#D6D6BD' if (move[2] + move[3]) % 2 == 0 else '#6A874D'
 
                 # position of circle
                 if self.board[move[2]][move[3]] == 0:
@@ -546,18 +560,27 @@ class ChessGame:
         board[move[0]][move[1]] = 0
         board[move[2]][move[3]] = piece
 
-        # Promotion of pawns
+        # Promotion of pawns and en passant
         if piece == 1:
             if move[2] == 0:
+                # If white pawn reaches the last row, promote it
                 board[move[2]][move[3]] = 5
+
+            # If the end square is the en passant square, do an en passant
+            elif (move[2], move[3]) == self.en_passant:
+                board[move[2] + 1][move[3]] = 0
 
         elif piece == -1:
             if move[2] == 7:
+                # If black pawn reaches the last row, promote it
                 board[move[2]][move[3]] = -5
 
+            # If the end square is the en passant square, do an en passant
+            elif (move[2], move[3]) == self.en_passant:
+                board[move[2] - 1][move[3]] = 0
+
         # Castling
-        print(abs(move[1] - move[3]))
-        if abs(piece) == 6 and abs(move[1] - move[3]) == 2:
+        elif abs(piece) == 6 and abs(move[1] - move[3]) == 2:
             # King side castling
             if move[3] == 2:
                 board[move[0]][3] = board[move[0]][0]
@@ -594,5 +617,17 @@ class ChessGame:
                 self.blackRook1_moved = True
             elif (move[0], move[1]) == (0, 7):
                 self.blackRook2_moved = True
+
+        # Set and reset en passant square
+        if piece == 1 and move[2] - move[0] == -2:
+            # If pawn moved 2 steps, set en passant square equal to the skipped square
+            self.en_passant = (move[2] + 1, move[3])
+
+        elif piece == -1 and move[2] - move[0] == 2:
+            # If pawn moved 2 steps, set en passant square equal to the skipped square
+            self.en_passant = (move[2] - 1, move[3])
+
+        else:
+            self.en_passant = None
 
         return board
