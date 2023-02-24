@@ -11,3 +11,10 @@ SQSIZE = WIDTH // COLS
 LEFT = 1
 MIDDLE = 2
 RIGHT = 3
+
+# Engine modes
+RANDOM = 10
+
+# Player colors
+WHITE = 0
+BLACK = 1

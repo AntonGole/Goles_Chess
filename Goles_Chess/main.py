@@ -3,6 +3,7 @@ import sys
 
 from const import *
 from chessGame import ChessGame, calculate_moves
+from chessEngine import ChessEngine
 
 
 class Main:
@@ -12,6 +13,7 @@ class Main:
         self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption('Goles Chess')
         self.game = ChessGame()
+        self.engine = ChessEngine(RANDOM)
 
     def mainloop(self):
 
@@ -61,9 +63,11 @@ class Main:
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == LEFT:
                     if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(game, dragger.piece, dragger.initial_row, dragger.initial_col):
                         game.make_move(board, (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE), dragger.piece)
-                        game.lastMove = (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE)
-                        game.swap_turn()
+                        
                     dragger.undrag_piece()
+
+                elif event.type == pygame.MOUSEBUTTONUP and event.button == RIGHT:
+                    self.engine.move(game.turn, game, board)
 
                 # quit application event
                 elif event.type == pygame.QUIT:

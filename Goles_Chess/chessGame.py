@@ -276,7 +276,7 @@ def calculate_straight_moves(board, piece, row, col):
 
 def calculate_moves(game, piece, row, col):
     """
-        Calculate all possible (valid) moves of a piece from a specific position
+        Calculate all possible (valid) moves of a piece from a specific position, return type: 4-tuple
     """
 
     board = game.board
@@ -494,8 +494,7 @@ class ChessGame:
         self.images = loadImages()
         self.dragger = Dragger()
 
-        # 0 = White, 1 = Black
-        self.turn = 0
+        self.turn = WHITE
 
         self.whiteCastled = False
         self.blackCastled = False
@@ -509,7 +508,7 @@ class ChessGame:
         self.en_passant = None
 
     def swap_turn(self):
-        self.turn = 1 if self.turn == 0 else 0
+        self.turn = BLACK if self.turn == WHITE else WHITE
 
     # Show methods
 
@@ -629,5 +628,8 @@ class ChessGame:
 
         else:
             self.en_passant = None
+
+        self.lastMove = move
+        self.swap_turn()
 
         return board
