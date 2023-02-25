@@ -2,7 +2,7 @@ import pygame
 import sys
 
 from const import *
-from chessGame import ChessGame, calculate_moves
+from chessGame import ChessGame, calculate_moves, inCheck
 from chessEngine import ChessEngine
 
 
@@ -19,7 +19,7 @@ class Main:
 
         screen = self.screen
         game = self.game
-        board = self.game.board
+        board = self.game.chessBoard
         dragger = self.game.dragger
 
         while True:
@@ -39,9 +39,9 @@ class Main:
                     clicked_row = dragger.mouseY // SQSIZE
                     clicked_col = dragger.mouseX // SQSIZE
 
-                    piece = board[clicked_row][clicked_col]
+                    piece = board.get(clicked_row, clicked_col)
 
-                    if piece != 0 and ((piece > 0 and game.turn == 0) or (piece < 0 and game.turn == 1)):
+                    if piece != 0 and ((piece > 0 and board.turn == 0) or (piece < 0 and board.turn == 1)):
 
                         dragger.save_initial(event.pos)
                         dragger.drag_piece(piece)
@@ -61,13 +61,14 @@ class Main:
 
                 # click release event
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == LEFT:
-                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(game, dragger.piece, dragger.initial_row, dragger.initial_col):
-                        game.make_move(board, (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE), dragger.piece)
-                        
+                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(board, dragger.piece, dragger.initial_row, dragger.initial_col):
+                        board.move((dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE))
+
                     dragger.undrag_piece()
 
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == RIGHT:
-                    self.engine.move(game.turn, game, board)
+                    self.engine.move(board.turn, board)
+                    #print(inCheck(BLACK, game, board))
 
                 # quit application event
                 elif event.type == pygame.QUIT:
