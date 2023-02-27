@@ -2,7 +2,7 @@ import pygame
 import sys
 
 from const import *
-from chessGame import ChessGame, calculate_moves, inCheck
+from chessGame import ChessGame, calculate_legal_moves, calculate_pseudo_moves, inCheck
 from chessEngine import ChessEngine
 
 
@@ -61,14 +61,18 @@ class Main:
 
                 # click release event
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == LEFT:
-                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_moves(board, dragger.piece, dragger.initial_row, dragger.initial_col):
+                    if (dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE) in calculate_legal_moves(board, board.turn):
                         board.move((dragger.initial_row, dragger.initial_col, dragger.mouseY // SQSIZE, dragger.mouseX // SQSIZE))
 
                     dragger.undrag_piece()
 
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == RIGHT:
-                    self.engine.move(board.turn, board)
-                    #print(inCheck(BLACK, game, board))
+                    #self.engine.move(board, board.turn)
+                    #print(calculate_pseudo_moves(board, BLACK))
+                    #self.engine.multi_move(board.turn, board)
+                    #print(inCheck(BLACK, board, board.board))
+                    #print(self.engine.count_possible_moves(board, board.turn, 5))
+                    board.print_board()
 
                 # quit application event
                 elif event.type == pygame.QUIT:

@@ -20,11 +20,6 @@ class ChessBoard:
 
 		self.en_passant = en_passant
 
-	def __copy__(self):
-		return ChessBoard(self.board, self.turn, self.whiteCastled, self.blackCastled, self.lastMove,
-						  self.whiteRook1_moved, self.whiteRook2_moved, self.blackRook1_moved, self.blackRook2_moved,
-						  self.en_passant)
-
 	def swap_turn(self):
 		self.turn = BLACK if self.turn == WHITE else WHITE
 
@@ -114,3 +109,41 @@ class ChessBoard:
 
 		self.lastMove = move
 		self.swap_turn()
+
+	def print_board(self):
+		"""
+		print_board print the board in console with unicodes of pieces
+		"""
+		for row in range(ROWS):
+			row_strings = []
+			for col in range(COLS):
+				if self.board[row][col] == 0:
+					if (row + col) % 2 == 0:
+						row_strings.append(unicodes.get(BLACK_EMPTY) + "\u2006 ")
+					else:
+						row_strings.append(unicodes.get(WHITE_EMPTY) + "\u2006 ")
+				elif self.board[row][col] == WHITE_PAWN:
+					row_strings.append(unicodes.get(WHITE_PAWN) + " ")
+				elif self.board[row][col] == WHITE_KNIGHT:
+					row_strings.append(unicodes.get(WHITE_KNIGHT) + " ")
+				elif self.board[row][col] == WHITE_BISHOP:
+					row_strings.append(unicodes.get(WHITE_BISHOP) + " ")
+				elif self.board[row][col] == WHITE_ROOK:
+					row_strings.append(unicodes.get(WHITE_ROOK) + " ")
+				elif self.board[row][col] == WHITE_QUEEN:
+					row_strings.append(unicodes.get(WHITE_QUEEN) + " ")
+				elif self.board[row][col] == WHITE_KING:
+					row_strings.append(unicodes.get(WHITE_KING) + " ")
+				elif self.board[row][col] == BLACK_PAWN:
+					row_strings.append(unicodes.get(BLACK_PAWN) + " ")
+				elif self.board[row][col] == BLACK_KNIGHT:
+					row_strings.append(unicodes.get(BLACK_KNIGHT) + " ")
+				elif self.board[row][col] == BLACK_BISHOP:
+					row_strings.append(unicodes.get(BLACK_BISHOP) + " ")
+				elif self.board[row][col] == BLACK_ROOK:
+					row_strings.append(unicodes.get(BLACK_ROOK) + " ")
+				elif self.board[row][col] == BLACK_QUEEN:
+					row_strings.append(unicodes.get(BLACK_QUEEN) + " ")
+				elif self.board[row][col] == BLACK_KING:
+					row_strings.append(unicodes.get(BLACK_KING) + " ")
+			print("".join(row_strings))

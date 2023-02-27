@@ -1,3 +1,5 @@
+import copy
+
 import pygame
 from const import *
 from dragger import Dragger
@@ -7,12 +9,12 @@ from chessBoard import ChessBoard
 # Return a new chess board in the form of a 2x2 array
 
 # 0 = Empty piece
-# 1, -1 = White pawn, Black pawn
-# 2, -2 = White knight, Black knight
-# 3, -3 = White bishop, Black bishop
-# 4, -4 = White rook, Black rook
-# 5, -5 = White queen, Black queen
-# 6, -6 = White king, Black king
+# 1, -1 = White Pawn, Black Pawn
+# 2, -2 = White Knight, Black Knight
+# 3, -3 = White Bishop, Black Bishop
+# 4, -4 = White Rook, Black Rook
+# 5, -5 = White Queen, Black Queen
+# 6, -6 = White King, Black King
 
 def newChessBoard():
     return [[-4, -2, -3, -5, -6, -3, -2, -4],
@@ -26,476 +28,672 @@ def newChessBoard():
 
 
 def testChessBoard():
-    return [[-4, 0, 0, 0, -6, 0, 0, -4],
-            [-1, -1, -1, -1, -1, -1, -1, -1],
+    return [[0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, -4, 0, 0, 0],
+            [0, 0, 0, 6, 0, 0, 0, 0],
+            [0, 0, -5, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1, 1],
-            [4, 0, 0, 0, 6, 0, 0, 4]]
+            [0, 0, 0, 0, 0, 0, 0, 0]]
 
 
 def in_range(move):
     return max(move[0], move[1]) < 8 and min(move[0], move[1]) > -1
 
 
-def calculate_diagonal_moves(board, piece, row, col):
-    valid_moves = []
-
-    r = row
-    c = col
-
-    # NW
-
-    while True:
-        r -= 1
-        c -= 1
-
-        if not in_range((r, c)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(r, c) < 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(r, c) > 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) < 0:
-                break
-
-        valid_moves.append((row, col, r, c))
-
-    r = row
-    c = col
-
-    # NE
-
-    while True:
-        r -= 1
-        c += 1
-
-        if not in_range((r, c)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(r, c) < 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(r, c) > 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) < 0:
-                break
-
-        valid_moves.append((row, col, r, c))
-
-    r = row
-    c = col
-
-    # SE
-
-    while True:
-        r += 1
-        c += 1
-
-        if not in_range((r, c)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(r, c) < 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(r, c) > 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) < 0:
-                break
-
-        valid_moves.append((row, col, r, c))
-
-    r = row
-    c = col
-
-    # SW
-
-    while True:
-        r += 1
-        c -= 1
-
-        if not in_range((r, c)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(r, c) < 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(r, c) > 0:
-                valid_moves.append((row, col, r, c))
-                break
-            elif board.get(r, c) < 0:
-                break
-
-        valid_moves.append((row, col, r, c))
-
-    return valid_moves
-
-
-def calculate_straight_moves(board, piece, row, col):
-    valid_moves = []
-    r = row
-
-    # N
-
-    while True:
-        r -= 1
-
-        if not in_range((r, col)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(r, col) < 0:
-                valid_moves.append((row, col, r, col))
-                break
-            elif board.get(r, col) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(r, col) > 0:
-                valid_moves.append((row, col, r, col))
-                break
-            elif board.get(r, col) < 0:
-                break
-
-        valid_moves.append((row, col, r, col))
-
-    c = col
-
-    # E
-
-    while True:
-        c += 1
-
-        if not in_range((row, c)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(row, c) < 0:
-                valid_moves.append((row, col, row, c))
-                break
-            elif board.get(row, c) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(row, c) > 0:
-                valid_moves.append((row, col, row, c))
-                break
-            elif board.get(row, c) < 0:
-                break
-
-        valid_moves.append((row, col, row, c))
-
-    r = row
-
-    # S
-
-    while True:
-        r += 1
-
-        if not in_range((r, col)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(r, col) < 0:
-                valid_moves.append((row, col, r, col))
-                break
-            elif board.get(r, col) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(r, col) > 0:
-                valid_moves.append((row, col, r, col))
-                break
-            elif board.get(r, col) < 0:
-                break
-
-        valid_moves.append((row, col, r, col))
-
-    c = col
-
-    # W
-
-    while True:
-        c -= 1
-
-        if not in_range((row, c)):
-            break
-        # If white piece
-        if piece > 0:
-            if board.get(row, c) < 0:
-                valid_moves.append((row, col, row, c))
-                break
-            elif board.get(row, c) > 0:
-                break
-
-        # If black piece
-        elif piece < 0:
-            if board.get(row, c) > 0:
-                valid_moves.append((row, col, row, c))
-                break
-            elif board.get(row, c) < 0:
-                break
-
-        valid_moves.append((row, col, row, c))
-
-    return valid_moves
-
-
-def calculate_moves(board, piece, row, col):
+def calculate_pseudo_moves(chessBoard, color):
     """
-        Calculate all possible (valid) moves of a piece from a specific position, return type: 4-tuple
+    calculate_pseudo_moves calculates all possible moves for the given color without considering checks and pins
+
+    :param chessBoard: An instance of ChessBoard that contains relevant information about the game
+    :param color: Which color to calculate
     """
 
+    board = chessBoard.board
+    whiteCastled = chessBoard.whiteCastled
+    blackCastled = chessBoard.blackCastled
+
+    whiteRook1_moved = chessBoard.whiteRook1_moved
+    whiteRook2_moved = chessBoard.whiteRook2_moved
+
+    blackRook1_moved = chessBoard.blackRook1_moved
+    blackRook2_moved = chessBoard.blackRook2_moved
+
+    # Variable that stores all pseudo-moves as 4 tuples (start_row, start_col, end_row, end_col)
+    pseudo_moves = []
+
+    # Iterate through all squares
+    for row in range(ROWS):
+        for col in range(COLS):
+            piece = board[row][col]
+
+            # White pieces
+            if piece > 0 and color == WHITE:
+
+                # White pawn moves
+                if piece == WHITE_PAWN:
+                    # One step forward
+                    if board[row - 1][col] == 0:
+                        pseudo_moves.append((row, col, row - 1, col))
+
+                    # Two steps forward
+                    if row == 6 and board[row - 2][col] == 0 and board[row - 1][col] == 0:
+                        pseudo_moves.append((row, col, row - 2, col))
+
+                    # Diagonal steps
+                    if in_range((row - 1, col - 1)):
+                        if board[row - 1][col - 1] < 0:
+                            pseudo_moves.append((row, col, row - 1, col - 1))
+                    if in_range((row - 1, col + 1)):
+                        if board[row - 1][col + 1] < 0:
+                            pseudo_moves.append((row, col, row - 1, col + 1))
+
+                    # En passant
+                    # If the en passant col is 1 step away from pawns col and the en passant row is 1 step above the
+                    # pawns row
+                    if chessBoard.en_passant is not None:
+                        if abs(col - chessBoard.en_passant[1]) == 1 and row - chessBoard.en_passant[0] == 1:
+                            pseudo_moves.append((row, col, chessBoard.en_passant[0], chessBoard.en_passant[1]))
+
+                # White knight moves
+                if piece == WHITE_KNIGHT:
+                    possible_moves = [
+                        (row - 2, col + 1),
+                        (row - 1, col + 2),
+                        (row + 1, col + 2),
+                        (row + 2, col + 1),
+                        (row + 2, col - 1),
+                        (row + 1, col - 2),
+                        (row - 1, col - 2),
+                        (row - 2, col - 1),
+                    ]
+                    for possible_move in possible_moves:
+                        if in_range(possible_move):
+                            if board[possible_move[0]][possible_move[1]] < 1:
+                                pseudo_moves.append((row, col, possible_move[0], possible_move[1]))
+
+                # White king moves
+                if piece == WHITE_KING:
+                    possible_moves = [
+                        (row - 1, col),
+                        (row - 1, col + 1),
+                        (row, col + 1),
+                        (row + 1, col + 1),
+                        (row + 1, col),
+                        (row + 1, col - 1),
+                        (row, col - 1),
+                        (row - 1, col - 1),
+                    ]
+
+                    # Castling
+                    if not whiteCastled:
+                        if not whiteRook1_moved:
+                            c = col
+                            while True:
+                                c -= 1
+
+                                if not board[row][c] == 0:
+                                    break
+
+                                if c == 1:
+                                    pseudo_moves.append((row, col, row, 1))
+                                    break
+
+                        if not whiteRook2_moved:
+                            c = col
+                            while True:
+                                c += 1
+
+                                if not board[row][c] == 0:
+                                    break
+
+                                if c == 6:
+                                    pseudo_moves.append((row, col, row, 6))
+                                    break
+
+                    for possible_move in possible_moves:
+                        if in_range(possible_move):
+                            if board[possible_move[0]][possible_move[1]] < 1:
+                                pseudo_moves.append((row, col, possible_move[0], possible_move[1]))
+
+                # Sliding pieces
+
+                # White bishop moves
+                if piece == WHITE_BISHOP:
+                    pseudo_moves.extend(calculate_diagonal_moves(board, color, row, col))
+
+                # White rook moves
+                if piece == WHITE_ROOK:
+                    pseudo_moves.extend(calculate_straight_moves(board, color, row, col))
+
+                # White queen moves
+                if piece == WHITE_QUEEN:
+                    pseudo_moves.extend(calculate_diagonal_moves(board, color, row, col) +
+                                        calculate_straight_moves(board, color, row, col))
+
+            # Black pieces
+            elif piece < 0 and color == BLACK:
+
+                # BLACK pawn moves
+                if piece == BLACK_PAWN:
+                    # One step forward
+                    if board[row + 1][col] == 0:
+                        pseudo_moves.append((row, col, row + 1, col))
+
+                    # Two steps forward
+                    if row == 1 and board[row + 2][col] == 0 and board[row + 1][col] == 0:
+                        pseudo_moves.append((row, col, row + 2, col))
+
+                    # Diagonal steps
+                    if in_range((row + 1, col - 1)):
+                        if board[row + 1][col - 1] > 0:
+                            pseudo_moves.append((row, col, row + 1, col - 1))
+                    if in_range((row + 1, col + 1)):
+                        if board[row + 1][col + 1] > 0:
+                            pseudo_moves.append((row, col, row + 1, col + 1))
+
+                    # En passant
+                    # If the en passant col is 1 step away from pawns col and the en passant row is 1 step above the
+                    # pawns row
+                    if chessBoard.en_passant is not None:
+                        if abs(col - chessBoard.en_passant[1]) == 1 and row - chessBoard.en_passant[0] == -1:
+                            pseudo_moves.append((row, col, chessBoard.en_passant[0], chessBoard.en_passant[1]))
+
+                # Black knight moves
+                if piece == BLACK_KNIGHT:
+                    possible_moves = [
+                        (row - 2, col + 1),
+                        (row - 1, col + 2),
+                        (row + 1, col + 2),
+                        (row + 2, col + 1),
+                        (row + 2, col - 1),
+                        (row + 1, col - 2),
+                        (row - 1, col - 2),
+                        (row - 2, col - 1),
+                    ]
+                    for possible_move in possible_moves:
+                        if in_range(possible_move):
+                            if board[possible_move[0]][possible_move[1]] > -1:
+                                pseudo_moves.append((row, col, possible_move[0], possible_move[1]))
+
+                # White king moves
+                if piece == BLACK_KING:
+                    possible_moves = [
+                        (row - 1, col),
+                        (row - 1, col + 1),
+                        (row, col + 1),
+                        (row + 1, col + 1),
+                        (row + 1, col),
+                        (row + 1, col - 1),
+                        (row, col - 1),
+                        (row - 1, col - 1),
+                    ]
+
+                    # Castling
+                    if not blackCastled:
+                        if not blackRook1_moved:
+                            c = col
+                            while True:
+                                c -= 1
+
+                                if not board[row][c] == 0:
+                                    break
+
+                                if c == 1:
+                                    pseudo_moves.append((row, col, row, 1))
+                                    break
+
+                        if not blackRook2_moved:
+                            c = col
+                            while True:
+                                c += 1
+
+                                if not board[row][c] == 0:
+                                    break
+
+                                if c == 6:
+                                    pseudo_moves.append((row, col, row, 6))
+                                    break
+
+                    for possible_move in possible_moves:
+                        if in_range(possible_move):
+                            if board[possible_move[0]][possible_move[1]] > -1:
+                                pseudo_moves.append((row, col, possible_move[0], possible_move[1]))
+
+                # Sliding pieces
+
+                # Black bishop moves
+                if piece == BLACK_BISHOP:
+                    pseudo_moves.extend(calculate_diagonal_moves(board, color, row, col))
+
+                # Black rook moves
+                if piece == BLACK_ROOK:
+                    pseudo_moves.extend(calculate_straight_moves(board, color, row, col))
+
+                # Black queen moves
+                if piece == BLACK_QUEEN:
+                    pseudo_moves.extend(calculate_diagonal_moves(board, color, row, col) +
+                                        calculate_straight_moves(board, color, row, col))
+
+    return pseudo_moves
+
+
+def calculate_legal_moves(chessBoard, color):
+    """
+    calculate_legal_moves calculates all possible moves for the given color considering checks and pins
+
+    :param chessBoard: An instance of ChessBoard that contains relevant information about the game
+    :param color: Which color to calculate
+    """
+
+    # Variable that stores all legal moves as 4 tuples (start_row, start_col, end_row, end_col)
+    legal_moves = []
+
+    pseudo_moves = calculate_pseudo_moves(chessBoard, color)
+
+    for move in pseudo_moves:
+        new_chessBoard = copy.deepcopy(chessBoard)
+        new_chessBoard.move(move)
+
+        # Check if white king is in check after making the move, remove the move from the legal_moves list
+        if color == WHITE:
+            if not inCheck(new_chessBoard, WHITE):
+                legal_moves.append(move)
+
+        # Check if black king is in check after making the move, remove the move from the legal_moves list
+        else:
+            if not inCheck(new_chessBoard, BLACK):
+                legal_moves.append(move)
+
+    return legal_moves
+
+
+def calculate_diagonal_moves(board, color, row, col):
+    """
+        calculate_diagonal_moves calculates all possible diagonal moves from a given position
+
+        :param board: 2D array that represents the game position
+        :param color: Which color to calculate
+        :param row: Row of square to calculate from
+        :param col: Col of square to calculate from
+    """
+
     valid_moves = []
 
-    # White pawn moves
-    if piece == 1:
-        # One step forward
-        possible_moves = [(row - 1, col)]
-
-        # Two steps forward
-        if row == 6 and board.get(row - 1, col) == 0:
-            possible_moves.append((row-2, col))
-
-        # Diagonal steps
-        if in_range((row - 1, col - 1)):
-            if board.get(row - 1, col - 1) < 0:
-                valid_moves.append((row, col, row - 1, col - 1))
-        if in_range((row - 1, col + 1)):
-            if board.get(row - 1, col + 1) < 0:
-                valid_moves.append((row, col, row - 1, col + 1))
-
-        # En passant
-        # If the en passant col is 1 step away from pawns col and the en passant row is 1 step above the pawns row
-        if board.en_passant is not None:
-            if abs(col - board.en_passant[1]) == 1 and row - board.en_passant[0] == 1:
-                valid_moves.append((row, col, board.en_passant[0], board.en_passant[1]))
-
-        for possible_move in possible_moves:
-            if board.get(possible_move[0], possible_move[1]) == 0:
-                # Add the possible move as a 4-tuple to the list of valid moves
-                valid_moves.append((row, col, possible_move[0], possible_move[1]))
-
-    # White knight moves
-    if piece == 2:
-        possible_moves = [
-            (row - 2, col + 1),
-            (row - 1, col + 2),
-            (row + 1, col + 2),
-            (row + 2, col + 1),
-            (row + 2, col - 1),
-            (row + 1, col - 2),
-            (row - 1, col - 2),
-            (row- 2, col - 1),
-        ]
-        for possible_move in possible_moves:
-            if in_range(possible_move):
-                if board.get(possible_move[0], possible_move[1]) < 1:
-                    # Add the possible move as a 4-tuple to the list of valid moves
-                    valid_moves.append((row, col, possible_move[0], possible_move[1]))
-
-    # White king moves
-    if piece == 6:
-        possible_moves = [
-            (row - 1, col),
-            (row - 1, col + 1),
-            (row, col + 1),
-            (row + 1, col + 1),
-            (row + 1, col),
-            (row + 1, col - 1),
-            (row, col - 1),
-            (row - 1, col - 1),
-        ]
-
-        # Castling
-        if not board.whiteCastled:
-            if not board.whiteRook1_moved:
-                c = col
-                while True:
-                    c -= 1
-
-                    if not board.get(row, c) == 0:
-                        break
-
-                    if c == 1:
-                        valid_moves.append((row, col, row, col-2))
-
-            if not board.whiteRook2_moved:
-                c = col
-                while True:
-                    c += 1
-
-                    if not board.get(row, c) == 0:
-                        break
-
-                    if c == 6:
-                        valid_moves.append((row, col, row, col + 2))
-
-        for possible_move in possible_moves:
-            if in_range(possible_move):
-                if board.get(possible_move[0], possible_move[1]) < 1:
-                    # Add the possible move as a 4-tuple to the list of valid moves
-                    valid_moves.append((row, col, possible_move[0], possible_move[1]))
-
-    # Black pawn moves
-    if piece == -1:
-        # One step forward
-        possible_moves = [(row + 1, col)]
-
-        # Two steps forward
-        if row == 1 and board.get(row + 1, col) == 0:
-            possible_moves.append((row + 2, col))
-
-        # Diagonal steps
-        if in_range((row + 1, col - 1)):
-            if board.get(row + 1, col - 1) > 0:
-                valid_moves.append((row, col, row + 1, col - 1))
-        if in_range((row + 1, col + 1)):
-            if board.get(row + 1, col + 1) > 0:
-                valid_moves.append((row, col, row + 1, col + 1))
-
-        # En passant
-        # If the en passant col is 1 step away from pawns col and the en passant row is 1 step below the pawns row
-        if board.en_passant is not None:
-            if abs(col - board.en_passant[1]) == 1 and row - board.en_passant[0] == -1:
-                valid_moves.append((row, col, board.en_passant[0], board.en_passant[1]))
-
-        for possible_move in possible_moves:
-            if board.get(possible_move[0], possible_move[1]) == 0:
-                # Add the possible move as a 4-tuple to the list of valid moves
-                valid_moves.append((row, col, possible_move[0], possible_move[1]))
-
-    # Black knight moves
-    if piece == -2:
-        possible_moves = [
-            (row - 2, col + 1),
-            (row - 1, col + 2),
-            (row + 1, col + 2),
-            (row + 2, col + 1),
-            (row + 2, col - 1),
-            (row + 1, col - 2),
-            (row - 1, col - 2),
-            (row - 2, col - 1),
-        ]
-        for possible_move in possible_moves:
-            if in_range(possible_move):
-                if board.get(possible_move[0], possible_move[1]) > -1:
-                    # Add the possible move as a 4-tuple to the list of valid moves
-                    valid_moves.append((row, col, possible_move[0], possible_move[1]))
-
-    # Black king moves
-    if piece == -6:
-        possible_moves = [
-            (row - 1, col),
-            (row - 1, col + 1),
-            (row, col + 1),
-            (row + 1, col + 1),
-            (row + 1, col),
-            (row + 1, col - 1),
-            (row, col - 1),
-            (row - 1, col - 1),
-        ]
-
-        # Castling
-        if not board.blackCastled:
-            if not board.blackRook1_moved:
-                c = col
-                while True:
-                    c -= 1
-
-                    if not board.get(row, c) == 0:
-                        break
-
-                    if c == 1:
-                        valid_moves.append((row, col, row, col - 2))
-
-            if not board.blackRook2_moved:
-                c = col
-                while True:
-                    c += 1
-
-                    if not board.get(row, c) == 0:
-                        break
-
-                    if c == 6:
-                        valid_moves.append((row, col, row, col + 2))
-
-        for possible_move in possible_moves:
-            if in_range(possible_move):
-                if board.get(possible_move[0], possible_move[1]) > -1:
-                    # Add the possible move as a 4-tuple to the list of valid moves
-                    valid_moves.append((row, col, possible_move[0], possible_move[1]))
-
-    # White + Black bishop moves
-    if abs(piece) == 3:
-        return calculate_diagonal_moves(board, piece, row, col)
-
-    # White + Black rook moves
-    if abs(piece) == 4:
-        return calculate_straight_moves(board, piece, row, col)
-
-    # White + Black queen moves
-    if abs(piece) == 5:
-        return calculate_diagonal_moves(board, piece, row, col) + calculate_straight_moves(board, piece, row, col)
-
-    return valid_moves
-
-
-def inCheck(color, game, board):
     if color == WHITE:
-        for r, row in enumerate(board):
-            for c, col in enumerate(row):
+
+        r = row
+        c = col
+
+        # NW
+
+        while True:
+            r -= 1
+            c -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # NE
+
+        while True:
+            r -= 1
+            c += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # SE
+
+        while True:
+            r += 1
+            c += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # SW
+
+        while True:
+            r += 1
+            c -= 1
+
+            if not in_range((r, c)):
+                break
+            # If white piece
+            if color == WHITE:
                 if board[r][c] < 0:
-                    new_moves = calculate_moves(game, board[r][c], r, c)
-                    if not len(new_moves) == 0:
-                        for move in new_moves:
-                            if board[move[2]][move[3]] == 6:
-                                return True
+                    valid_moves.append((row, col, r, c))
+                    break
+                elif board[r][c] > 0:
+                    break
+
+            # If black piece
+            else:
+                if board[r][c] > 0:
+                    valid_moves.append((row, col, r, c))
+                    break
+                elif board[r][c] < 0:
+                    break
+
+            valid_moves.append((row, col, r, c))
+
+    # If black piece
+    else:
+
+        r = row
+        c = col
+
+        # NW
+
+        while True:
+            r -= 1
+            c -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # NE
+
+        while True:
+            r -= 1
+            c += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # SE
+
+        while True:
+            r += 1
+            c += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # SW
+
+        while True:
+            r += 1
+            c -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+    return valid_moves
+
+
+def calculate_straight_moves(board, color, row, col):
+    """
+        calculate_diagonal_moves calculates all possible straight moves from a given position
+
+        :param board: 2D array that represents the game position
+        :param color: Which color to calculate
+        :param row: Row of square to calculate from
+        :param col: Col of square to calculate from
+    """
+
+    valid_moves = []
+
+    # If white piece
+    if color == WHITE:
+
+        r = row
+        c = col
+
+        # N
+
+        while True:
+            r -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # E
+
+        while True:
+            c += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # S
+
+        while True:
+            r += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # W
+
+        while True:
+            c -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] < 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] > 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+    # If black piece
+    else:
+
+        r = row
+        c = col
+
+        # N
+
+        while True:
+            r -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # E
+
+        while True:
+            c += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # S
+
+        while True:
+            r += 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+        r = row
+        c = col
+
+        # W
+
+        while True:
+            c -= 1
+
+            if not in_range((r, c)):
+                break
+
+            if board[r][c] > 0:
+                valid_moves.append((row, col, r, c))
+                break
+            elif board[r][c] < 0:
+                break
+
+            valid_moves.append((row, col, r, c))
+
+    return valid_moves
+
+
+def inCheck(chessBoard, color):
+
+    board = chessBoard.board
+
+    # Calculate attacks from opposing color
+    if color == WHITE:
+        attacks = calculate_pseudo_moves(chessBoard, BLACK)
+
+        # Search for an attack on the white king square
+        for attack in attacks:
+            if board[attack[2]][attack[3]] == WHITE_KING:
+                return True
+
         return False
 
-    if color == BLACK:
-        for r, row in enumerate(board):
-            for c, col in enumerate(row):
-                if board[r][c] > 0:
-                    new_moves = calculate_moves(game, board[r][c], r, c)
-                    if not len(new_moves) == 0:
-                        for move in new_moves:
-                            if board[move[2]][move[3]] == -6:
-                                return True
+    else:
+        attacks = calculate_pseudo_moves(chessBoard, WHITE)
+
+        # Search for an attack on the black king square
+        for attack in attacks:
+            if board[attack[2]][attack[3]] == BLACK_KING:
+                return True
+
         return False
 
 
@@ -516,11 +714,6 @@ class ChessGame:
         self.chessBoard = ChessBoard(newChessBoard(), WHITE, False, False, None, False, False, False, False, None)
         self.images = loadImages()
         self.dragger = Dragger()
-
-    def __copy__(self):
-        board_copy = self.chessBoard.board
-
-        return ChessGame()
 
     # Show methods
 
@@ -551,9 +744,7 @@ class ChessGame:
 
     def show_moves(self, surface):
         if self.dragger.dragging:
-            piece = self.dragger.piece
-
-            moves = calculate_moves(self.chessBoard, piece, self.dragger.initial_row, self.dragger.initial_col)
+            moves = calculate_legal_moves(self.chessBoard, self.chessBoard.turn)
 
             for move in moves:
                 # color
