@@ -2,8 +2,11 @@ import pygame
 import sys
 
 from const import *
-from chessGame import ChessGame, calculate_legal_moves, calculate_pseudo_moves, inCheck
-from chessEngine import ChessEngine
+from chessGame import ChessGame, calculate_legal_moves, calculate_legal_moves_v2, calculate_pseudo_moves, inCheck
+from chessEngine import ChessEngine, time_function
+import time
+from copy import deepcopy
+
 
 
 class Main:
@@ -71,8 +74,27 @@ class Main:
                     #print(calculate_pseudo_moves(board, BLACK))
                     #self.engine.multi_move(board.turn, board)
                     #print(inCheck(BLACK, board, board.board))
-                    #print(self.engine.count_possible_moves(board, board.turn, 5))
-                    board.print_board()
+
+                    #time_function(calculate_legal_moves, board, WHITE)
+                    #time_function(calculate_legal_moves_v2, board, WHITE)
+
+                    for n in range(6):
+                        tic = time.perf_counter()
+                        print(self.engine.perft_v2(board, board.turn, n))
+                        toc = time.perf_counter()
+                        print(f"Calculated at depth {n} in {toc - tic:0.9f} seconds")
+
+                    #list_1 = self.engine.perft_2(board, board.turn, 4)
+                    #list_2 = self.engine.perft_3(board, board.turn, 4)
+
+                    #print(time_function(self.engine.perft, board, board.turn, 4))
+
+                    #print(len(list_1))
+                    #print(len(list_2))
+
+                    #board.print_board()
+                    #board.undo_move(board.move_info)
+                    #board.test()
 
                 # quit application event
                 elif event.type == pygame.QUIT:

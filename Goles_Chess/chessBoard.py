@@ -1,8 +1,9 @@
 from const import *
+from copy import deepcopy
 
 
 class ChessBoard:
-	def __init__(self, board, turn, whiteCastled, blackCastled, lastMove, whiteRook1_moved, whiteRook2_moved,
+	def __init__(self, board, turn, whiteCastled, blackCastled, whiteRook1_moved, whiteRook2_moved,
 				 blackRook1_moved, blackRook2_moved, en_passant):
 
 		self.board = board
@@ -11,7 +12,6 @@ class ChessBoard:
 
 		self.whiteCastled = whiteCastled
 		self.blackCastled = blackCastled
-		self.lastMove = lastMove
 
 		self.whiteRook1_moved = whiteRook1_moved
 		self.whiteRook2_moved = whiteRook2_moved
@@ -35,12 +35,19 @@ class ChessBoard:
 		self.set(pos2[0], pos2[1], piece1)
 
 	def move(self, move):
+		#move_info = [deepcopy(self.board), self.turn, self.whiteCastled, self.blackCastled, self.whiteRook1_moved,
+		#			 self.whiteRook2_moved, self.blackRook1_moved, self.blackRook2_moved, self.en_passant]
+
 		piece = self.get(move[0], move[1])
+		captured = self.get(move[2], move[3])
 		self.set(move[0], move[1], 0)
 		self.set(move[2], move[3], piece)
 
+		move_info = [move, piece, captured, self.turn, self.whiteCastled, self.blackCastled, self.whiteRook1_moved,
+					 self.whiteRook2_moved, self.blackRook1_moved, self.blackRook2_moved, self.en_passant]
+
 		# Promotion of pawns and en passant
-		if piece == 1:
+		if piece == WHITE_PAWN:
 			if move[2] == 0:
 				# If white pawn reaches the last row, promote it
 				self.set(move[2], move[3], 5)
@@ -49,17 +56,13 @@ class ChessBoard:
 			elif (move[2], move[3]) == self.en_passant:
 				self.set(move[2] + 1, move[3], 0)
 
-		elif piece == -1:
-			if move[2] == 7:
-				# If black pawn reaches the last row, promote it
-				self.set(move[2], move[3], -5)
-
+		elif piece == BLACK_PAWN:
 			# If the end square is the en passant square, do an en passant
-			elif (move[2], move[3]) == self.en_passant:
+			if (move[2], move[3]) == self.en_passant:
 				self.set(move[2] - 1, move[3], 0)
 
 		# Castling
-		elif abs(piece) == 6 and abs(move[1] - move[3]) == 2:
+		elif abs(piece) == WHITE_KING and abs(move[1] - move[3]) == 2:
 			# King side castling
 			if move[3] == 2:
 				self.swap((move[0], 3), (move[0], 0))
@@ -77,38 +80,39 @@ class ChessBoard:
 					self.blackCastled = True
 
 		# Castling privileges
-		elif piece == 6:
+		elif piece == WHITE_KING:
 			self.whiteCastled = True
 
-		elif piece == -6:
+		elif piece == BLACK_KING:
 			self.blackCastled = True
 
-		elif piece == 4 and not self.whiteCastled:
+		elif piece == WHITE_ROOK and not self.whiteCastled:
 			if (move[0], move[1]) == (7, 0):
 				self.whiteRook1_moved = True
 			elif (move[0], move[1]) == (7, 7):
 				self.whiteRook2_moved = True
 
-		elif piece == -4 and not self.blackCastled:
+		elif piece == BLACK_ROOK and not self.blackCastled:
 			if (move[0], move[1]) == (0, 0):
 				self.blackRook1_moved = True
 			elif (move[0], move[1]) == (0, 7):
 				self.blackRook2_moved = True
 
 		# Set and reset en passant square
-		if piece == 1 and move[2] - move[0] == -2:
+		if piece == WHITE_PAWN and move[2] - move[0] == -2:
 			# If pawn moved 2 steps, set en passant square equal to the skipped square
 			self.en_passant = (move[2] + 1, move[3])
 
-		elif piece == -1 and move[2] - move[0] == 2:
+		elif piece == BLACK_PAWN and move[2] - move[0] == 2:
 			# If pawn moved 2 steps, set en passant square equal to the skipped square
 			self.en_passant = (move[2] - 1, move[3])
 
 		else:
 			self.en_passant = None
 
-		self.lastMove = move
 		self.swap_turn()
+
+		return move_info
 
 	def print_board(self):
 		"""
@@ -147,3 +151,48 @@ class ChessBoard:
 				elif self.board[row][col] == BLACK_KING:
 					row_strings.append(unicodes.get(BLACK_KING) + " ")
 			print("".join(row_strings))
+
+	def undo_move(self, move_info):
+		self.set(move_info[0][0], move_info[0][1], move_info[1])
+		self.set(move_info[0][2], move_info[0][3], move_info[2])
+
+		# Promotion of pawns and en passant
+		if move_info[1] == WHITE_PAWN:
+			# If the end square is the en passant square, do an en passant
+			if (move_info[0][2], move_info[0][3]) == move_info[10]:
+				self.set(move_info[0][2] + 1, move_info[0][3], BLACK_PAWN)
+
+		elif move_info[1] == BLACK_PAWN:
+			# If the end square is the en passant square, do an en passant
+			if (move_info[0][2], move_info[0][3]) == move_info[10]:
+				self.set(move_info[0][2] - 1, move_info[0][3], WHITE_PAWN)
+
+		# Castling
+		elif abs(move_info[1]) == WHITE_KING and abs(move_info[0][1] - move_info[0][3]) == 2:
+			# King side castling
+			if move_info[0][3] == 2:
+				self.swap((move_info[0][0], 3), (move_info[0][0], 0))
+				if move_info[1] == 6:
+					self.whiteCastled = True
+				else:
+					self.blackCastled = True
+
+			# Queen side castling
+			if move_info[0][3] == 6:
+				self.swap((move_info[0][0], 5), (move_info[0][0], 7))
+				if move_info[1] == 6:
+					self.whiteCastled = True
+				else:
+					self.blackCastled = True
+
+		self.turn = move_info[3]
+
+		self.whiteCastled = move_info[4]
+		self.blackCastled = move_info[5]
+
+		self.whiteRook1_moved = move_info[6]
+		self.whiteRook2_moved = move_info[7]
+		self.blackRook1_moved = move_info[8]
+		self.blackRook2_moved = move_info[9]
+
+		self.en_passant = move_info[10]

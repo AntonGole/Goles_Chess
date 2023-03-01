@@ -309,6 +309,41 @@ def calculate_legal_moves(chessBoard, color):
     return legal_moves
 
 
+def calculate_legal_moves_v2(chessBoard, color):
+    """
+    calculate_legal_moves calculates all possible moves for the given color considering checks and pins
+
+    :param chessBoard: An instance of ChessBoard that contains relevant information about the game
+    :param color: Which color to calculate
+    """
+
+    # Variable that stores all legal moves as 4 tuples (start_row, start_col, end_row, end_col)
+    legal_moves = []
+
+    pseudo_moves = calculate_pseudo_moves(chessBoard, color)
+
+    for move in pseudo_moves:
+        move_info = chessBoard.move(move)
+
+        # Check if white king is in check after making the move, add the move to the legal_moves list
+        if color == WHITE:
+            if not inCheck(chessBoard, WHITE):
+                legal_moves.append(move)
+                chessBoard.undo_move(move_info)
+            else:
+                chessBoard.undo_move(move_info)
+
+        # Check if black king is in check after making the move, ad the move to the legal_moves list
+        else:
+            if not inCheck(chessBoard, BLACK):
+                legal_moves.append(move)
+                chessBoard.undo_move(move_info)
+            else:
+                chessBoard.undo_move(move_info)
+
+    return legal_moves
+
+
 def calculate_diagonal_moves(board, color, row, col):
     """
         calculate_diagonal_moves calculates all possible diagonal moves from a given position
@@ -711,7 +746,7 @@ def loadImages():
 class ChessGame:
 
     def __init__(self):
-        self.chessBoard = ChessBoard(newChessBoard(), WHITE, False, False, None, False, False, False, False, None)
+        self.chessBoard = ChessBoard(newChessBoard(), WHITE, False, False, False, False, False, False, None)
         self.images = loadImages()
         self.dragger = Dragger()
 

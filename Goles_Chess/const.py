@@ -54,3 +54,5 @@ unicodes = {
 	WHITE_EMPTY: "\u25FB",
 	BLACK_EMPTY: "\u25FC",
 }
+
+move_infos = []
