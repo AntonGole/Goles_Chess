@@ -2,10 +2,14 @@ import pygame
 import sys
 
 from const import *
-from chessGame import ChessGame, calculate_legal_moves, calculate_legal_moves_v2, calculate_pseudo_moves, inCheck
+from chessGame import ChessGame, calculate_legal_moves, calculate_legal_moves_v2, calculate_pseudo_moves, inCheck, \
+    newChessBoard
 from chessEngine import ChessEngine, time_function
 import time
+from bitBoard import Bitboard
 from copy import deepcopy
+
+from ctypes import c_ulonglong as U64
 
 
 
@@ -70,13 +74,24 @@ class Main:
                     dragger.undrag_piece()
 
                 elif event.type == pygame.MOUSEBUTTONUP and event.button == RIGHT:
-                    #self.engine.move(board, board.turn)
-                    #print(calculate_pseudo_moves(board, BLACK))
-                    #self.engine.multi_move(board.turn, board)
-                    #print(inCheck(BLACK, board, board.board))
-
                     #time_function(calculate_legal_moves, board, WHITE)
                     #time_function(calculate_legal_moves_v2, board, WHITE)
+
+                    bitboard = Bitboard(newChessBoard())
+                    bitboard.show()
+                    print(bitboard.whitePawns)
+                    print(bitboard.whiteKnights)
+                    print(bitboard.whiteBishops)
+                    print(bitboard.whiteRooks)
+                    print(bitboard.whiteQueens)
+                    print(bitboard.whiteKing)
+                    print(bitboard.blackPawns)
+                    print(bitboard.blackKnights)
+                    print(bitboard.blackBishops)
+                    print(bitboard.blackRooks)
+                    print(bitboard.blackQueens)
+                    print(bitboard.blackKing)
+
 
                     for n in range(6):
                         tic = time.perf_counter()

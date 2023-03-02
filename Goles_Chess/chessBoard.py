@@ -35,9 +35,11 @@ class ChessBoard:
 		self.set(pos2[0], pos2[1], piece1)
 
 	def move(self, move):
-		#move_info = [deepcopy(self.board), self.turn, self.whiteCastled, self.blackCastled, self.whiteRook1_moved,
-		#			 self.whiteRook2_moved, self.blackRook1_moved, self.blackRook2_moved, self.en_passant]
+		"""
+		move makes a move using given 4-tuple
 
+		:param move: a 4-tuple containing the following values: (start_row, start_col, end_row, end_col)
+		"""
 		piece = self.get(move[0], move[1])
 		captured = self.get(move[2], move[3])
 		self.set(move[0], move[1], 0)
@@ -153,6 +155,12 @@ class ChessBoard:
 			print("".join(row_strings))
 
 	def undo_move(self, move_info):
+		"""
+		undo_move undoes the previous move
+
+		:param move_info: an array containing information about the previous state variables before the move was made,
+		as well as the move itself and the piece moved and piece captured (might be an emtpy square)
+		"""
 		self.set(move_info[0][0], move_info[0][1], move_info[1])
 		self.set(move_info[0][2], move_info[0][3], move_info[2])
 
