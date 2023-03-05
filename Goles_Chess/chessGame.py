@@ -279,6 +279,31 @@ def calculate_pseudo_moves(chessBoard, color):
     return pseudo_moves
 
 
+def calculate_pseudo_moves_v2(bitBoard, color):
+    """
+    calculate_pseudo_moves_v2 calculates all possible moves for the given color without considering checks and pins
+    using the Bitboard class as representation
+
+    :param bitBoard: An instance of BitBoard that contains relevant information about the game
+    :param color: Which color to calculate
+    """
+
+    pseudo_moves = []
+
+    # White pieces
+    if color == 0:
+        empty = bitBoard.empty()
+        wpawns = bitBoard.whitePawns
+
+        # Pawn moves
+
+        # One step forward
+
+
+
+    return pseudo_moves
+
+
 def calculate_legal_moves(chessBoard, color):
     """
     calculate_legal_moves calculates all possible moves for the given color considering checks and pins
@@ -311,7 +336,8 @@ def calculate_legal_moves(chessBoard, color):
 
 def calculate_legal_moves_v2(chessBoard, color):
     """
-    calculate_legal_moves calculates all possible moves for the given color considering checks and pins
+    calculate_legal_moves calculates all possible moves for the given color considering checks and pins using the
+    chessBoard class as representation
 
     :param chessBoard: An instance of ChessBoard that contains relevant information about the game
     :param color: Which color to calculate

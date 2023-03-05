@@ -6,7 +6,7 @@ from chessGame import ChessGame, calculate_legal_moves, calculate_legal_moves_v2
     newChessBoard
 from chessEngine import ChessEngine, time_function
 import time
-from bitBoard import Bitboard
+from bitBoard.bitBoard import BitBoard
 from copy import deepcopy
 
 from ctypes import c_ulonglong as U64
@@ -77,7 +77,7 @@ class Main:
                     #time_function(calculate_legal_moves, board, WHITE)
                     #time_function(calculate_legal_moves_v2, board, WHITE)
 
-                    bitboard = Bitboard(newChessBoard())
+                    bitboard = BitBoard(newChessBoard())
                     bitboard.show()
                     print(bitboard.whitePawns)
                     print(bitboard.whiteKnights)

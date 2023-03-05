@@ -2,7 +2,7 @@ from ctypes import c_ulonglong as U64
 from const import *
 
 
-class Bitboard:
+class BitBoard:
 	def __init__(self, board):
 		self.whitePawns = U64(0).value
 		self.whiteKnights = U64(0).value
@@ -88,3 +88,21 @@ class Bitboard:
 
 		for col in range(8):
 			print("".join(col_strings[7-col]))
+
+	def whitePieces(self):
+		return (self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens |
+				self.whiteKing)
+
+	def blackPieces(self):
+		return (self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks | self.blackQueens |
+				self.blackKing)
+
+	def occupied(self):
+		return (self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens |
+				self.whiteKing | self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks |
+				self.blackQueens | self.blackKing)
+
+	def empty(self):
+		return ~(self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens |
+				 self.whiteKing | self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks |
+				 self.blackQueens | self.blackKing)

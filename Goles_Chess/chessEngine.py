@@ -4,6 +4,7 @@ from const import *
 from chessGame import calculate_legal_moves, calculate_legal_moves_v2
 import time
 import tensorflow as tf
+import multiprocessing
 
 
 class ChessEngine:
@@ -121,6 +122,59 @@ class ChessEngine:
 		:param color: which turn to start from
 		:param depth: which depth that should be stopped at
 		"""
+
+		if depth == 0:
+			return 1
+
+		total_moves = 0
+
+		if color == WHITE:
+			new_moves = calculate_legal_moves_v2(chessBoard, color)
+			if not len(new_moves) == 0:
+				for move in new_moves:
+					move_infos.append(chessBoard.move(move))
+					total_moves += self.perft_v2(chessBoard, BLACK, depth - 1)
+					chessBoard.undo_move(move_infos.pop())
+			else:
+				print(f"Check mate {color}, depth = {depth}")
+				chessBoard.print_board()
+				print("\n\n\n\n")
+		else:
+			new_moves = calculate_legal_moves_v2(chessBoard, color)
+			if not len(new_moves) == 0:
+				for move in new_moves:
+					move_infos.append(chessBoard.move(move))
+					total_moves += self.perft_v2(chessBoard, WHITE, depth - 1)
+					chessBoard.undo_move(move_infos.pop())
+			else:
+				print(f"Check mate {color}, depth = {depth}")
+				chessBoard.print_board()
+				print("\n\n\n\n")
+
+		return total_moves
+
+	"""
+		perft_v3 results:
+		Depth = 1: 0.001154700 seconds 
+		Depth = 2: 0.022314300 seconds 
+		Depth = 3: 0.517744100 seconds 
+		Depth = 4: 11.208699800 seconds 
+		Depth = 5: 292.794247400 seconds 
+		"""
+
+	def perft_v3(self, chessBoard, color, depth):
+		"""
+		perft_v2 (performance test, move path enumeration) is used for debugging purposes. It walks the move generation
+		tree of strictly legal moves to count all the leaf nodes of a certain depth
+		Version 2 makes use of move() and undo_move() to generate moves, and uses the class ChessBoard for representing
+		the game
+
+		:param chessBoard: the starting chessboard to evaluate from
+		:param color: which turn to start from
+		:param depth: which depth that should be stopped at
+		"""
+
+
 
 		if depth == 0:
 			return 1

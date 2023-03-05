@@ -1,3 +1,5 @@
+from ctypes import c_ulonglong as U64
+
 # Screen dimensions
 WIDTH = 512
 HEIGHT = 512
