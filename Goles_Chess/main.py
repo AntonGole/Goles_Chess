@@ -3,11 +3,13 @@ import sys
 
 from const import *
 from chessGame import ChessGame, calculate_legal_moves, calculate_legal_moves_v2, calculate_pseudo_moves, inCheck, \
-    newChessBoard
+    newChessBoard, emptyChessBoard
 from chessEngine import ChessEngine, time_function
 import time
 from bitBoard.bitBoard import BitBoard
-from copy import deepcopy
+from bitBoard.pawns import *
+from bitBoard.knights import *
+from bitBoard.kings import *
 
 from ctypes import c_ulonglong as U64
 
@@ -77,27 +79,17 @@ class Main:
                     #time_function(calculate_legal_moves, board, WHITE)
                     #time_function(calculate_legal_moves_v2, board, WHITE)
 
-                    bitboard = BitBoard(newChessBoard())
+                    bitboard = BitBoard(emptyChessBoard())
+                    bitboard.blackKings = wKingMoves(bitboard.whiteKings, bitboard.whitePieces())
+                    #bitboard.blackKing = kingAttacks(bitboard.whiteKings)
                     bitboard.show()
-                    print(bitboard.whitePawns)
-                    print(bitboard.whiteKnights)
-                    print(bitboard.whiteBishops)
-                    print(bitboard.whiteRooks)
-                    print(bitboard.whiteQueens)
-                    print(bitboard.whiteKing)
-                    print(bitboard.blackPawns)
-                    print(bitboard.blackKnights)
-                    print(bitboard.blackBishops)
-                    print(bitboard.blackRooks)
-                    print(bitboard.blackQueens)
-                    print(bitboard.blackKing)
 
 
-                    for n in range(6):
-                        tic = time.perf_counter()
-                        print(self.engine.perft_v2(board, board.turn, n))
-                        toc = time.perf_counter()
-                        print(f"Calculated at depth {n} in {toc - tic:0.9f} seconds")
+                    #for n in range(6):
+                    #    tic = time.perf_counter()
+                    #    print(self.engine.perft_v2(board, board.turn, n))
+                    #    toc = time.perf_counter()
+                    #    print(f"Calculated at depth {n} in {toc - tic:0.9f} seconds")
 
                     #list_1 = self.engine.perft_2(board, board.turn, 4)
                     #list_2 = self.engine.perft_3(board, board.turn, 4)

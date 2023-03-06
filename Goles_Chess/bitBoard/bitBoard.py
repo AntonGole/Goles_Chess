@@ -9,14 +9,14 @@ class BitBoard:
 		self.whiteBishops = U64(0).value
 		self.whiteRooks = U64(0).value
 		self.whiteQueens = U64(0).value
-		self.whiteKing = U64(0).value
+		self.whiteKings = U64(0).value
 
 		self.blackPawns = U64(0).value
 		self.blackKnights = U64(0).value
 		self.blackBishops = U64(0).value
 		self.blackRooks = U64(0).value
 		self.blackQueens = U64(0).value
-		self.blackKing = U64(0).value
+		self.blackKings = U64(0).value
 
 		for row in range(ROWS):
 			for col in range(COLS):
@@ -31,7 +31,7 @@ class BitBoard:
 				elif board[row][col] == 5:
 					self.whiteQueens |= (U64(1).value << (col + (7 - row) * 8))  # White queens
 				elif board[row][col] == 6:
-					self.whiteKing |= (U64(1).value << (col + (7 - row) * 8))  # White king
+					self.whiteKings |= (U64(1).value << (col + (7 - row) * 8))  # White king
 				elif board[row][col] == -1:
 					self.blackPawns |= (U64(1).value << (col + (7 - row) * 8))  # Black pawns
 				elif board[row][col] == -2:
@@ -43,7 +43,7 @@ class BitBoard:
 				elif board[row][col] == -5:
 					self.blackQueens |= (U64(1).value << (col + (7 - row) * 8))  # Black queens
 				elif board[row][col] == -6:
-					self.blackKing |= (U64(1).value << (col + (7 - row) * 8))  # Black king
+					self.blackKings |= (U64(1).value << (col + (7 - row) * 8))  # Black king
 
 		print(self.whitePawns)
 
@@ -65,7 +65,7 @@ class BitBoard:
 					row_strings.append(unicodes.get(WHITE_ROOK) + " ")
 				elif (self.whiteQueens >> (col + row * 8)) & 1:
 					row_strings.append(unicodes.get(WHITE_QUEEN) + " ")
-				elif (self.whiteKing >> (col + row * 8)) & 1:
+				elif (self.whiteKings >> (col + row * 8)) & 1:
 					row_strings.append(unicodes.get(WHITE_KING) + " ")
 				elif (self.blackPawns >> (col + row * 8)) & 1:
 					row_strings.append(unicodes.get(BLACK_PAWN) + " ")
@@ -77,7 +77,7 @@ class BitBoard:
 					row_strings.append(unicodes.get(BLACK_ROOK) + " ")
 				elif (self.blackQueens >> (col + row * 8)) & 1:
 					row_strings.append(unicodes.get(BLACK_QUEEN) + " ")
-				elif (self.blackKing >> (col + row * 8)) & 1:
+				elif (self.blackKings >> (col + row * 8)) & 1:
 					row_strings.append(unicodes.get(BLACK_KING) + " ")
 				else:
 					if (row + col) % 2 == 0:
@@ -91,18 +91,18 @@ class BitBoard:
 
 	def whitePieces(self):
 		return (self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens |
-				self.whiteKing)
+				self.whiteKings)
 
 	def blackPieces(self):
 		return (self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks | self.blackQueens |
-				self.blackKing)
+				self.blackKings)
 
 	def occupied(self):
 		return (self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens |
-				self.whiteKing | self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks |
-				self.blackQueens | self.blackKing)
+				self.whiteKings | self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks |
+				self.blackQueens | self.blackKings)
 
 	def empty(self):
 		return ~(self.whitePawns | self.whiteKnights | self.whiteBishops | self.whiteRooks | self.whiteQueens |
-				 self.whiteKing | self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks |
-				 self.blackQueens | self.blackKing)
+				 self.whiteKings | self.blackPawns | self.blackKnights | self.blackBishops | self.blackRooks |
+				 self.blackQueens | self.blackKings)
